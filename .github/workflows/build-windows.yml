@@ -1,0 +1,39 @@
+name: Build Electron App (Windows)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies (electron)
+        working-directory: electron
+        run: npm install
+
+      - name: Build frontend
+        working-directory: electron/app/frontend
+        run: npm install && npm run build
+
+      - name: Copy built frontend
+        run: |
+          mkdir electron/app/frontend/build
+          cp -r electron/app/frontend/build/* electron/app/frontend/build/
+
+      - name: Build electron app
+        working-directory: electron
+        run: npm run dist
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TKD-Manager
+          path: electron/dist/*
+
